@@ -12,3 +12,9 @@ LoRA replaces weight update matrices with a low-rank approximation. In general, 
 The image below gives a simplified representation of a single weight update step from a full finetune (on the left) compared to a weight update step with LoRA (on the right). The LoRA matrices A and B serve as an approximation to the full rank weight update in blue.
 
 ![Finetuning with LoRA](https://raw.githubusercontent.com/sulaiman-shamasna/Finetuning-Llama2-with-LoRA/main/image/image.png)
+
+Although LoRA introduces a few extra parameters in the model ```forward()```, only the A and B matrices are trainable. This means that with a rank r LoRA decomposition, the number of gradients we need to store reduces from ```in_dim*out_dim``` to ```r*(in_dim+out_dim)```. (Remember that in general r is much smaller than ```in_dim``` and ```out_dim```.)
+
+For example, in the 7B Llama2’s self-attention, ```in_dim=out_dim=4096``` for the Q, K, and V projections. This means a LoRA decomposition of rank r=8 will reduce the number of trainable parameters for a given projection from 
+ to 
+, a reduction of over 99%.
