@@ -11,4 +11,4 @@ LoRA replaces weight update matrices with a low-rank approximation. In general, 
 
 The image below gives a simplified representation of a single weight update step from a full finetune (on the left) compared to a weight update step with LoRA (on the right). The LoRA matrices A and B serve as an approximation to the full rank weight update in blue.
 
-<!-- ![image.png](https://github.com/username/repository/blob/main/path/to/image.png) -->
+![image.png](https://github.com/sulaiman-shamasna/Finetuning-Llama2-with-LoRA/tree/main/image)
