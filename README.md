@@ -18,3 +18,49 @@ Although LoRA introduces a few extra parameters in the model ```forward()```, on
 For example, in the 7B Llama2’s self-attention, ```in_dim=out_dim=4096``` for the Q, K, and V projections. This means a LoRA decomposition of rank r=8 will reduce the number of trainable parameters for a given projection from 
  to 
 , a reduction of over 99%.
+
+### Implementation with PyTorch
+Let’s take a look at a minimal implementation of LoRA in native PyTorch.
+1. **Create a LoRA layer** (check [this](https://github.com/sulaiman-shamasna/Finetuning-Llama2-with-LoRA/blob/main/lora.py)) for the complete code, which looks something like:
+```python
+from torch import nn, Tensor
+
+class LoRALinear(nn.Module):
+  def __init__(
+    self,
+    in_dim: int,
+    out_dim: int,
+    rank: int,
+    alpha: float,
+    dropout: float
+  ):
+  ...
+```
+There are some other details around initialization which we omit here, but if you’d like to know more you can see our implementation in [LoRALinear](https://pytorch.org/torchtune/stable/generated/torchtune.modules.peft.LoRALinear.html#torchtune.modules.peft.LoRALinear). Now that we understand what LoRA is doing, let’s look at how we can apply it to our favorite models.
+
+2. **Applying LoRA to Llama2 models**. With torchtune, we can easily apply LoRA to Llama2 with a variety of different configurations. Let’s take a look at how to construct Llama2 models in torchtune with and without LoRA. Complete code can be found [here](https://github.com/sulaiman-shamasna/Finetuning-Llama2-with-LoRA/blob/main/llama.py).
+```python
+from torchtune.models.llama2 import llama2_7b, lora_llama2_7b
+
+# Build Llama2 without any LoRA layers
+base_model = llama2_7b()
+lora_model = lora_llama2_7b(lora_attn_modules=["q_proj", "v_proj"])
+```
+
+**Note**: Calling ```lora_llama_2_7b``` alone will not handle the definition of which parameters are trainable. See [here/ bellow](https://github.com/sulaiman-shamasna/Finetuning-Llama2-with-LoRA/blob/main/llama.py) for how to do this.
+
+```python
+print(base_model.layers[0].attn)
+
+""" OUTPUT:
+
+CausalSelfAttention(
+  (q_proj): Linear(in_features=4096, out_features=4096, bias=False)
+  (k_proj): Linear(in_features=4096, out_features=4096, bias=False)
+  (v_proj): Linear(in_features=4096, out_features=4096, bias=False)
+  (output_proj): Linear(in_features=4096, out_features=4096, bias=False)
+  (pos_embeddings): RotaryPositionalEmbeddings()
+)
+"""
+```
+Notice that our LoRA model’s layer contains additional weights in the Q and V projections, as expected. Additionally, inspecting the type of ```lora_model``` and ```base_model```, would show that they are both instances of the same [TransformerDecoder](https://pytorch.org/torchtune/stable/generated/torchtune.modules.TransformerDecoder.html#torchtune.modules.TransformerDecoder). 
