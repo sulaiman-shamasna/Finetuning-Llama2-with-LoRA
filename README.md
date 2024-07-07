@@ -173,3 +173,7 @@ model:
 **Note**. All the finetuning runs below use the [llama2/7B_lora_single_device](https://github.com/pytorch/torchtune/blob/main/recipes/configs/llama2/7B_lora_single_device.yaml) config, which has a default batch size of 2. Modifying the batch size (or other hyperparameters, e.g. the optimizer) will impact both peak memory and final evaluation results.
 
 ![table](https://raw.githubusercontent.com/sulaiman-shamasna/Finetuning-Llama2-with-LoRA/main/image/table.png)
+
+We can see that our baseline settings give the lowest peak memory, but our evaluation performance is relatively lower. By enabling LoRA for all linear layers and increasing the rank to 64, we see almost a 4% absolute improvement in our accuracy on this task, but our peak memory also increases by about 1.4GB. These are just a couple simple experiments; we encourage you to run your own finetunes to find the right tradeoff for your particular setup.
+
+Additionally, if you want to decrease your model’s peak memory even further (and still potentially achieve similar model quality results), you can check out our [QLoRA tutorial](https://pytorch.org/torchtune/stable/tutorials/qlora_finetune.html#qlora-finetune-label).
